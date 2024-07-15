@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  ske.accountservice:
+    image: ${DOCKER_REGISTRY-}skeaccountservice
+    build:
+      context: .
+      dockerfile: SKe.AccountService/Dockerfile
