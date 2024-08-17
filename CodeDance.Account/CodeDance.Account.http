@@ -1,0 +1,6 @@
+@CodeDance.Account_HostAddress = http://localhost:5011
+
+GET {{CodeDance.Account_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
