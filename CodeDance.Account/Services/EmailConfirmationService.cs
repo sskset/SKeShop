@@ -3,7 +3,7 @@ using CodeDance.EmailSender;
 using EmailSender.SendGrid;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System.Net;
+using System;
 using System.Threading.Tasks;
 
 namespace CodeDance.Account.Services
@@ -38,12 +38,14 @@ namespace CodeDance.Account.Services
         public async Task SendConfirmationEmailAsync(IdentityUser user)
         {
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var emailConfirmationUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host}/api/auth/email-confirmation?email={user.Email}&token={emailConfirmationToken}";
+            var encodedEmail = Uri.EscapeDataString(user.Email);
+            var encodedToken = Uri.EscapeDataString(emailConfirmationToken);
+            var emailConfirmationUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host}/api/auth/email-confirmation?email={encodedEmail}&token={encodedToken}";
 
             await _emailSender.SendAsync(EmailTemplate.EmailConfirmationTemplateId, user.Email, new
             {
                 Email = user.Email,
-                Link = WebUtility.UrlEncode(emailConfirmationUrl)
+                Link = emailConfirmationUrl
             });
         }
     }

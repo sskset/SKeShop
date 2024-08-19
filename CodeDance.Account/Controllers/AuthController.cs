@@ -17,13 +17,15 @@ namespace CodeDance.Account.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger<AuthController> _logger;
         private readonly IEmailConfirmationServce _emailConfirmationServce;
+        private readonly IJwtTokenService _jwtTokenService;
 
-        public AuthController(UserManager<IdentityUser> userManager, IEmailSender emailSender, ILogger<AuthController> logger, IEmailConfirmationServce emailConfirmationServce)
+        public AuthController(UserManager<IdentityUser> userManager, IEmailSender emailSender, ILogger<AuthController> logger, IEmailConfirmationServce emailConfirmationServce, IJwtTokenService jwtTokenService)
         {
             _userManager = userManager;
             _emailSender = emailSender;
             _logger = logger;
             _emailConfirmationServce = emailConfirmationServce;
+            _jwtTokenService = jwtTokenService;
         }
 
         [AllowAnonymous]
@@ -39,7 +41,7 @@ namespace CodeDance.Account.Controllers
                 return Ok();
             }
 
-            foreach(var error in result.Errors)
+            foreach (var error in result.Errors)
             {
                 ModelState.AddModelError("", error.Description);
             }
@@ -49,28 +51,28 @@ namespace CodeDance.Account.Controllers
 
         [AllowAnonymous]
         [HttpGet("resend-email-confirmation")]
-        public async Task<IActionResult> ResendConfirmationEmail(ResendConfirmEmailModel model)
+        public async Task<IActionResult> ResendConfirmationEmail([FromQuery] ResendConfirmEmailModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 return NoContent();
             }
-            
+
             await _emailConfirmationServce.SendConfirmationEmailAsync(user);
             return Ok();
         }
 
         [AllowAnonymous]
         [HttpGet("email-confirmation")]
-        public async Task<IActionResult> ConfirmEmail(ConfirmEmailModel model)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if(user != null)
+            if (user != null)
             {
                 var result = await _userManager.ConfirmEmailAsync(user, model.Token);
 
-                if(result.Succeeded)
+                if (result.Succeeded)
                 {
                     return Ok();
                 }
@@ -78,5 +80,29 @@ namespace CodeDance.Account.Controllers
 
             return BadRequest();
         }
+
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                var isPasswordMatched = await _userManager.CheckPasswordAsync(user, model.Password);
+
+                if (!isPasswordMatched)
+                {
+                    return BadRequest();
+                }
+
+                var token = _jwtTokenService.GenerateToken(user);
+
+                return Ok(new { token });
+
+            }
+
+            return BadRequest();
+        }
+
     }
 }

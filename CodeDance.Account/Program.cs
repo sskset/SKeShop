@@ -66,6 +66,7 @@ builder.Services.AddHttpContextAccessor();
 
 // Application Services
 builder.Services.AddScoped<IEmailConfirmationServce, EmailConfirmationService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 // ends
 
 var app = builder.Build();
