@@ -42,10 +42,10 @@ namespace CodeDance.Account.Services
             var encodedToken = Uri.EscapeDataString(emailConfirmationToken);
             var emailConfirmationUrl = $"{_contextAccessor.HttpContext.Request.Scheme}://{_contextAccessor.HttpContext.Request.Host}/api/auth/email-confirmation?email={encodedEmail}&token={encodedToken}";
 
-            await _emailSender.SendAsync(EmailTemplate.EmailConfirmationTemplateId, user.Email, new
+            await _emailSender.SendAsync(EmailTemplate.ConfirmEmail, user.Email, new
             {
                 Email = user.Email,
-                Link = emailConfirmationUrl
+                Url = emailConfirmationUrl
             });
         }
     }
