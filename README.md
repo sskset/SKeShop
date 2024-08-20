@@ -1,2 +1,2 @@
-# skeshop
-Online Shop for fun
+# Code Dance - Account
+Simple demo for generate Jwt Token with AspNetCore Identity.
